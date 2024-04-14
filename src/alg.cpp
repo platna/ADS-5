@@ -2,10 +2,8 @@
 #include <string>
 #include <map>
 #include "tstack.h"
-
 TStack<char, 100> stack1;
 TStack<int, 100> stack2;
-
 int prior(char operand) {
     if (operand == '-') return 1;
     if (operand == '+') return 1;
@@ -13,13 +11,11 @@ int prior(char operand) {
     if (operand == '/') return 2;
     return 0;
 }
-
 std::string infx2pstfx(std::string inf) {
   // добавьте код
   return std::string("");
     std::string post;
     TStack<char, 100> stack;
-
     for (char c : inf) {
         if (isdigit(c)) {
             post += c;
@@ -49,7 +45,6 @@ std::string infx2pstfx(std::string inf) {
     }
     return post;
 }
-
 int eval(std::string pref) {
   // добавьте код
   return 0;
