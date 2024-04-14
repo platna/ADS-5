@@ -1,82 +1,97 @@
 // Copyright 2021 NNTU-CS
-#include <string>
 #include <map>
 #include "tstack.h"
-TStack<char, 100> stack1;
-TStack<int, 100> stack2;
-int prior(char operand) {
-    if (operand == '-') return 1;
-    if (operand == '+') return 1;
-    if (operand == '*') return 2;
-    if (operand == '/') return 2;
-    return 0;
+
+int prior(char sim) {
+    switch (sim) {
+    case '(':
+        return 0;
+        break;
+    case ')':
+        return 1;
+        break;
+    case '+':
+        return 2;
+        break;
+    case '-':
+        return 2;
+        break;
+    case '*':
+        return 3;
+        break;
+    case '/':
+        return 3;
+        break;
+    default:
+        return 0;
+        break;
+    }
 }
 std::string infx2pstfx(std::string inf) {
   // добавьте код
   return std::string("");
-    std::string post;
-    TStack<char, 100> stack;
-    for (char c : inf) {
-        if (isdigit(c)) {
-            post += c;
-            post += ' ';
-        } else if (c == '(') {
-            stack.push(c);
-        } else if (c == '+' || c == '-' || c == '*' || c == '/') {
-            while (!stack.isEmpty() && prior(stack.see()) >= prior(c)) {
-                post = post + stack.see() + ' ';
-                stack.pop();
+    TStack<char, 100> ownStack;
+    std::string res = "";
+    for (int i = 0; i < inf.size(); i++) {
+        if (isdigit(inf[i]) != 0) {
+            res += inf[i];
+        } else if (prior(inf[i]) == 2 || prior(inf[i]) == 3) {
+            res += " ";
+            if (ownStack.isEmpty() || prior(ownStack.get()) == 0 ||
+                prior(inf[i]) > prior(ownStack.get())) {
+                ownStack.push(inf[i]);
+            } else if (prior(inf[i]) <= prior(ownStack.get())) {
+                while (prior(inf[i]) <= prior(ownStack.get())) {
+                    res += ownStack.pop();
+                    res += " ";
+                }
+                ownStack.push(inf[i]);
             }
-            stack.push(c);
-        } else if (c == ')') {
-            while (!stack.isEmpty() && stack.see() != '(') {
-                post = post + stack.see() + ' ';
-                stack.pop();
+        } else if (prior(inf[i]) == 0) {
+            ownStack.push(inf[i]);
+        } else if (prior(inf[i]) == 1) {
+            while (prior(ownStack.get()) != 0) {
+                res += " ";
+                res += ownStack.pop();
             }
-            stack.pop();
+            ownStack.pop();
         }
     }
-    while (!stack.isEmpty()) {
-        post = post + stack.see() + ' ';
-        stack.pop();
+    while (!ownStack.isEmpty()) {
+        res += " ";
+        res += ownStack.pop();
     }
-    if (!post.empty()) {
-        post.pop_back();
-    }
-    return post;
+    return std::string(res);
 }
+int calculate(const int a, const int b, const char oper) {
+    switch (oper) {
+    case '+':
+        return b + a;
+    case '-':
+        return b - a;
+    case '*':
+        return a * b;
+    case '/':
+        return b / a;
+    default:
+        break;
+    }
+    return 0;
+}
+
 int eval(std::string pref) {
   // добавьте код
   return 0;
-    std::string strNumber = "";
-    for (char c : pref) {
-        if (c != ' ' && c != '+' && c != '-' && c != '*' && c != '/') {
-            strNumber += c;
-        }
-        if (c == ' ') {
-            if (!strNumber.empty()) {
-                int num = std::stoi(strNumber);
-                stack2.push(num);
-                strNumber = "";
-            }
-        }
-        if (c == '+' || c == '-' || c == '*' || c == '/') {
-            int b = stack2.see();
-            stack2.pop();
-            int a = stack2.see();
-            stack2.pop();
-
-            if (c == '+') {
-                stack2.push((a + b));
-            } else if (c == '-') {
-                stack2.push((a - b));
-            } else if (c == '*') {
-                stack2.push((a * b));
-            } else if (c == '/') {
-                stack2.push((a / b));
-            }
+    TStack<int, 100> opStack2;
+    for (int i = 0; i < pref.size(); i++) {
+        if (isdigit(pref[i]) != 0) {
+            int num = pref[i] - '0';
+            opStack2.push(num);
+        } else if (prior(pref[i]) == 2 || prior(pref[i]) == 3) {
+            int a = opStack2.pop();
+            int b = opStack2.pop();
+            opStack2.push(calculate(a, b, pref[i]));
         }
     }
-
-    return stack2.see();
+    return opStack2.pop();
 }
