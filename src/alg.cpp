@@ -9,8 +9,6 @@ std::string infx2pstfx(std::string);
 int eval(std::string);
 
 std::string infx2pstfx(std::string inf) {
-  // добавьте код
-  return std::string("");
   TStack<char, 100> stack;
   std::string line = "";
   bool flag = false;
